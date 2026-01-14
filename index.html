@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhotoShare - 照片分享社区</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script type="module" src="firebase-config.js"></script>
+    <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
+</head>
+<body class="light-mode">
+    <!-- 主题切换按钮 -->
+    <div class="theme-toggle">
+        <button class="theme-btn" id="themeToggle">
+            <i class="fas fa-moon"></i>
+        </button>
+    </div>
+
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo">
+                <i class="fas fa-camera"></i> PhotoShare
+            </a>
+            
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="搜索关键词或用户名...">
+                <button id="searchBtn"><i class="fas fa-search"></i></button>
+            </div>
+            
+            <div class="nav-links">
+                <a href="#" class="nav-link active" id="homeLink">
+                    <i class="fas fa-home"></i> 首页
+                </a>
+                <a href="#" class="nav-link" id="exploreLink">
+                    <i class="fas fa-compass"></i> 发现
+                </a>
+                <a href="#" class="nav-link" id="uploadLink">
+                    <i class="fas fa-cloud-upload-alt"></i> 上传
+                </a>
+                <a href="#" class="nav-link" id="profileLink" style="display:none;">
+                    <i class="fas fa-user"></i> 我的
+                </a>
+                <a href="#" class="nav-link" id="loginLink">
+                    <i class="fas fa-sign-in-alt"></i> 登录
+                </a>
+                <a href="#" class="nav-link" id="registerLink">
+                    <i class="fas fa-user-plus"></i> 注册
+                </a>
+                <button id="logoutBtn" class="logout-btn" style="display:none;">
+                    <i class="fas fa-sign-out-alt"></i> 退出
+                </button>
+            </div>
+            
+            <button class="mobile-menu-btn">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- 登录/注册模态框 -->
+    <div class="modal" id="authModal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div class="auth-tabs">
+                <button class="tab-btn active" id="loginTab">登录</button>
+                <button class="tab-btn" id="registerTab">注册</button>
+            </div>
+            
+            <form id="loginForm" class="auth-form active">
+                <h3>登录到您的账户</h3>
+                <div class="form-group">
+                    <label for="loginEmail">邮箱</label>
+                    <input type="email" id="loginEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">密码</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                <button type="submit" class="btn-primary">登录</button>
+                <div class="auth-error" id="loginError"></div>
+            </form>
+            
+            <form id="registerForm" class="auth-form">
+                <h3>创建新账户</h3>
+                <div class="form-group">
+                    <label for="registerUsername">用户名</label>
+                    <input type="text" id="registerUsername" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerEmail">邮箱</label>
+                    <input type="email" id="registerEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">密码</label>
+                    <input type="password" id="registerPassword" required minlength="6">
+                </div>
+                <div class="form-group">
+                    <label for="registerBio">个人简介 (可选)</label>
+                    <textarea id="registerBio" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn-primary">注册</button>
+                <div class="auth-error" id="registerError"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 上传模态框 -->
+    <div class="modal" id="uploadModal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h3>上传新照片</h3>
+            <form id="uploadForm">
+                <div class="form-group">
+                    <label for="photoTitle">照片标题</label>
+                    <input type="text" id="photoTitle" required>
+                </div>
+                <div class="form-group">
+                    <label for="photoDescription">照片描述</label>
+                    <textarea id="photoDescription" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="photoKeywords">关键词 (用逗号分隔，至少一个)</label>
+                    <input type="text" id="photoKeywords" placeholder="例如：风景,自然,旅行" required>
+                </div>
+                <div class="form-group">
+                    <label for="photoPrivacy">隐私设置</label>
+                    <select id="photoPrivacy">
+                        <option value="public">公开 (所有人可见)</option>
+                        <option value="private">私密 (仅自己可见)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="photoUpload">选择照片</label>
+                    <div class="upload-area" id="uploadArea">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>点击或拖拽上传照片</p>
+                        <input type="file" id="photoUpload" accept="image/*" style="display:none;">
+                    </div>
+                    <div class="image-preview" id="imagePreview"></div>
+                </div>
+                <button type="submit" class="btn-primary" id="uploadBtn">上传照片</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 图片详情模态框 -->
+    <div class="modal" id="imageDetailModal">
+        <div class="modal-content image-modal">
+            <span class="close-modal">&times;</span>
+            <div class="image-detail-container" id="imageDetailContent">
+                <!-- 动态加载图片详情 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 用户信息模态框 -->
+    <div class="modal" id="profileModal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div class="profile-content" id="profileContent">
+                <!-- 动态加载用户信息 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 主内容区域 -->
+    <main>
+        <div class="container">
+            <!-- 欢迎横幅 -->
+            <section class="welcome-banner" id="welcomeBanner">
+                <div class="banner-content">
+                    <h1>分享你的精彩瞬间</h1>
+                    <p>发现世界各地摄影师的作品，分享你的视角</p>
+                    <button class="btn-primary" id="getStartedBtn">开始探索</button>
+                </div>
+                <div class="banner-stats">
+                    <div class="stat">
+                        <i class="fas fa-images"></i>
+                        <div>
+                            <h3 id="totalPhotos">0</h3>
+                            <p>张照片</p>
+                        </div>
+                    </div>
+                    <div class="stat">
+                        <i class="fas fa-users"></i>
+                        <div>
+                            <h3 id="totalUsers">0</h3>
+                            <p>位用户</p>
+                        </div>
+                    </div>
+                    <div class="stat">
+                        <i class="fas fa-heart"></i>
+                        <div>
+                            <h3 id="totalLikes">0</h3>
+                            <p>次点赞</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 热门照片区域 -->
+            <section class="section">
+                <div class="section-header">
+                    <h2><i class="fas fa-fire"></i> 热门照片</h2>
+                    <a href="#" id="viewAllPopular">查看全部</a>
+                </div>
+                <div class="photo-grid" id="popularPhotos">
+                    <!-- 动态加载热门照片 -->
+                </div>
+            </section>
+
+            <!-- 最新照片区域 -->
+            <section class="section">
+                <div class="section-header">
+                    <h2><i class="fas fa-clock"></i> 最新照片</h2>
+                    <div class="view-options">
+                        <button class="view-option active" data-view="grid"><i class="fas fa-th"></i></button>
+                        <button class="view-option" data-view="list"><i class="fas fa-list"></i></button>
+                    </div>
+                </div>
+                <div class="photo-grid grid-view" id="recentPhotos">
+                    <!-- 动态加载最新照片 -->
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3><i class="fas fa-camera"></i> PhotoShare</h3>
+                <p>连接全球摄影爱好者，分享视觉故事</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-pinterest"></i></a>
+                </div>
+            </div>
+            <div class="footer-section">
+                <h4>快速链接</h4>
+                <ul>
+                    <li><a href="#" id="footerHome">首页</a></li>
+                    <li><a href="#" id="footerExplore">发现</a></li>
+                    <li><a href="#" id="footerUpload">上传照片</a></li>
+                    <li><a href="#" id="footerPopular">热门照片</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>帮助</h4>
+                <ul>
+                    <li><a href="#" id="aboutUsLink">关于我们</a></li>
+                    <li><a href="#" id="privacyLink">隐私政策</a></li>
+                    <li><a href="#" id="termsLink">使用条款</a></li>
+                    <li><a href="#" id="contactLink">联系我们</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>订阅更新</h4>
+                <p>订阅获取最新功能和摄影技巧</p>
+                <div class="subscribe-form">
+                    <input type="email" id="subscribeEmail" placeholder="您的邮箱">
+                    <button id="subscribeBtn">订阅</button>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2023 PhotoShare. 保留所有权利.</p>
+        </div>
+    </footer>
+
+    <!-- 加载动画 -->
+    <div class="loader" id="loader">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- 关于我们模态框 -->
+    <div class="modal" id="aboutModal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>关于 PhotoShare</h2>
+            <div class="about-content">
+                <p>PhotoShare 是一个全球摄影爱好者社区，致力于连接世界各地的摄影师，分享视觉故事和创意灵感。</p>
+                <p>我们的使命是创建一个友好、包容的平台，让每个人都能展示自己的摄影作品，发现他人的精彩瞬间，并通过视觉艺术连接彼此。</p>
+                <h3>主要功能</h3>
+                <ul>
+                    <li>上传和分享高质量照片</li>
+                    <li>发现全球摄影师的优秀作品</li>
+                    <li>智能关键词搜索和标签系统</li>
+                    <li>个性化推荐和热门内容</li>
+                    <li>关注你喜欢的摄影师</li>
+                    <li>完整的隐私控制设置</li>
+                </ul>
+                <h3>联系方式</h3>
+                <p>如有任何问题或建议，请通过以下方式联系我们：</p>
+                <p><i class="fas fa-envelope"></i> support@photoshare.com</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 隐私政策模态框 -->
+    <div class="modal" id="privacyModal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>隐私政策</h2>
+            <div class="privacy-content">
+                <p>最后更新日期：2023年10月15日</p>
+                <h3>我们收集的信息</h3>
+                <p>当您使用PhotoShare时，我们可能会收集以下信息：</p>
+                <ul>
+                    <li>注册信息（用户名、邮箱、密码）</li>
+                    <li>个人资料信息（头像、个人简介）</li>
+                    <li>上传的照片和相关信息</li>
+                    <li>互动数据（点赞、评论、关注）</li>
+                    <li>设备和使用数据</li>
+                </ul>
+                <h3>我们如何使用您的信息</h3>
+                <p>我们使用收集的信息来：</p>
+                <ul>
+                    <li>提供、维护和改进我们的服务</li>
+                    <li>个性化您的体验</li>
+                    <li>显示相关内容推荐</li>
+                    <li>保护平台安全和完整性</li>
+                    <li>与您沟通重要更新</li>
+                </ul>
+                <h3>信息共享</h3>
+                <p>我们不会出售您的个人信息。我们可能会在以下情况下共享信息：</p>
+                <ul>
+                    <li>征得您的同意</li>
+                    <li>遵守法律义务</li>
+                    <li>保护用户和平台安全</li>
+                    <li>与服务提供商合作（如Cloudinary、Firebase）</li>
+                </ul>
+                <h3>您的权利</h3>
+                <p>您可以：</p>
+                <ul>
+                    <li>访问和更新您的个人信息</li>
+                    <li>删除您的账户和数据</li>
+                    <li>调整隐私设置</li>
+                    <li>选择退出营销通信</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
