@@ -4,7 +4,7 @@ let currentTheme = 'light';
 let photos = [];
 let featuredPhotos = [];
 let users = new Map();
-let adminEmails = ['admin@example.com']; // 添加你的管理员邮箱
+let adminEmails = ['haochenxihehaohan@outlook.com']; // 添加你的管理员邮箱
 
 // DOM 元素
 const elements = {
