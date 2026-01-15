@@ -1,4 +1,4 @@
-// Firebase配置
+// Firebase 配置
 const firebaseConfig = {
     apiKey: "AIzaSyC3Dz_j6n9dRJP_MPaplhgro5x-sbmH3yw",
     authDomain: "photo-e92b2.firebaseapp.com",
@@ -9,27 +9,31 @@ const firebaseConfig = {
     measurementId: "G-5EH6GFC1CE"
 };
 
-// 初始化Firebase
-firebase.initializeApp(firebaseConfig);
-
-// Firebase服务引用
+// 初始化 Firebase
+const app = firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
-const db = firebase.firestore();
-const storage = firebase.storage();
+const firestore = firebase.firestore();
 const analytics = firebase.analytics();
 
-// Cloudinary配置
-const cloudinaryConfig = {
-    cloudName: 'dy77idija',
-    apiKey: '735299868247252',
-    // API Secret should be kept server-side in production
-    uploadPreset: 'photo_share_app'
-};
+// 初始化函数
+async function initFirebase() {
+    try {
+        // 启用离线持久化
+        await firestore.enablePersistence({
+            synchronizeTabs: true
+        });
+        
+        console.log('Firebase 初始化成功');
+    } catch (error) {
+        console.error('Firebase 初始化失败:', error);
+        
+        if (error.code === 'failed-precondition') {
+            console.error('多个标签页同时打开了 Firebase 持久化');
+        } else if (error.code === 'unimplemented') {
+            console.error('当前浏览器不支持 Firebase 持久化');
+        }
+    }
+}
 
-// 导出Firebase服务
-window.firebaseServices = {
-    auth,
-    db,
-    storage,
-    analytics
-};
+// 导出 Firebase 实例
+window.firebase = firebase;
