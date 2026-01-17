@@ -3,269 +3,277 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>照片分享社区</title>
+    <title>PhotoShare - 分享精彩时刻</title>
+    <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-    <script type="module" src="firebase-config.js"></script>
-    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
-    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
-    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
-    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js"></script>
 </head>
 <body>
     <!-- 导航栏 -->
     <nav class="navbar">
         <div class="nav-container">
-            <a href="#" class="logo">
-                <i class="fas fa-camera"></i>
-                <span>照片分享</span>
-            </a>
-            
-            <div class="search-container">
-                <i class="fas fa-search search-icon"></i>
-                <input type="text" id="searchInput" placeholder="搜索图片、用户或关键词...">
+            <div class="nav-logo">
+                <i class="fas fa-camera-retro"></i>
+                <span>PhotoShare</span>
+            </div>
+            <div class="nav-search">
+                <input type="text" id="searchInput" placeholder="搜索照片、视频或用户...">
                 <button id="searchBtn"><i class="fas fa-search"></i></button>
             </div>
-            
-            <div class="nav-links">
-                <a href="#" id="homeBtn"><i class="fas fa-home"></i> 首页</a>
-                <a href="#" id="uploadBtn"><i class="fas fa-cloud-upload-alt"></i> 上传</a>
-                <a href="#" id="profileBtn"><i class="fas fa-user"></i> 个人中心</a>
-                <a href="#" id="themeToggle"><i class="fas fa-moon"></i> 主题</a>
-                <a href="#" id="logoutBtn" class="hide"><i class="fas fa-sign-out-alt"></i> 退出</a>
-                <a href="#" id="loginBtn"><i class="fas fa-sign-in-alt"></i> 登录</a>
+            <div class="nav-menu">
+                <a href="#" class="nav-link" id="homeLink"><i class="fas fa-home"></i><span>首页</span></a>
+                <a href="#" class="nav-link" id="exploreLink"><i class="fas fa-compass"></i><span>发现</span></a>
+                <a href="#" class="nav-link" id="hotLink"><i class="fas fa-fire"></i><span>热门</span></a>
+                <a href="#" class="nav-link" id="discussionLink"><i class="fas fa-comments"></i><span>讨论</span></a>
             </div>
-            
-            <button class="mobile-menu-btn">
-                <i class="fas fa-bars"></i>
-            </button>
+            <div class="nav-actions">
+                <button class="nav-btn" id="themeToggle">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button class="nav-btn primary" id="uploadBtn">
+                    <i class="fas fa-cloud-upload-alt"></i><span>上传</span>
+                </button>
+                <button class="nav-btn" id="profileBtn" style="display: none;">
+                    <i class="fas fa-user-circle"></i>
+                </button>
+                <button class="nav-btn" id="loginBtn">
+                    <i class="fas fa-sign-in-alt"></i><span>登录</span>
+                </button>
+            </div>
         </div>
     </nav>
 
+    <!-- 主内容区 -->
+    <main class="main-content">
+        <!-- 首页内容 -->
+        <section id="homeSection" class="content-section active">
+            <div class="section-header">
+                <h1>发现精彩瞬间</h1>
+                <p>分享你的照片和视频，记录美好时光</p>
+            </div>
+            <div class="filter-bar">
+                <button class="filter-btn active" data-filter="all">全部</button>
+                <button class="filter-btn" data-filter="photos">照片</button>
+                <button class="filter-btn" data-filter="videos">视频</button>
+            </div>
+            <div class="content-grid" id="homeGrid"></div>
+            <div class="loading" id="homeLoading" style="display: none;">
+                <i class="fas fa-spinner fa-spin"></i>
+            </div>
+        </section>
+
+        <!-- 发现页面 -->
+        <section id="exploreSection" class="content-section">
+            <div class="section-header">
+                <h1>探索发现</h1>
+                <p>发现更多精彩内容</p>
+            </div>
+            <div class="content-grid" id="exploreGrid"></div>
+        </section>
+
+        <!-- 热门内容 -->
+        <section id="hotSection" class="content-section">
+            <div class="section-header">
+                <h1>热门内容</h1>
+                <p>最受欢迎的照片和视频</p>
+            </div>
+            <div class="content-grid" id="hotGrid"></div>
+        </section>
+
+        <!-- 讨论区 -->
+        <section id="discussionSection" class="content-section">
+            <div class="section-header">
+                <h1>讨论交流</h1>
+                <p>与摄影爱好者交流心得</p>
+            </div>
+            <div class="discussion-container">
+                <div class="discussion-input">
+                    <textarea id="discussionText" placeholder="分享你的摄影心得..."></textarea>
+                    <button id="postDiscussion" class="btn-primary">发布</button>
+                </div>
+                <div class="discussion-list" id="discussionList"></div>
+            </div>
+        </section>
+
+        <!-- 个人资料页面 -->
+        <section id="profileSection" class="content-section">
+            <div class="profile-container" id="profileContainer"></div>
+        </section>
+
+        <!-- 搜索结果页面 -->
+        <section id="searchResultsSection" class="content-section">
+            <div class="section-header">
+                <h1 id="searchTitle">搜索结果</h1>
+            </div>
+            <div class="content-grid" id="searchResultsGrid"></div>
+        </section>
+    </main>
+
+    <!-- 上传模态框 -->
+    <div class="modal" id="uploadModal">
+        <div class="modal-content upload-modal">
+            <div class="modal-header">
+                <h2>上传内容</h2>
+                <button class="modal-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="upload-tabs">
+                    <button class="upload-tab active" data-type="photo">照片</button>
+                    <button class="upload-tab" data-type="video">视频</button>
+                </div>
+                <form id="uploadForm">
+                    <div class="upload-area" id="uploadArea">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>点击或拖拽文件到这里</p>
+                        <input type="file" id="fileInput" accept="image/*,video/*">
+                    </div>
+                    <div class="file-preview" id="filePreview"></div>
+                    <div class="form-group">
+                        <label>标题 *</label>
+                        <input type="text" id="uploadTitle" required>
+                    </div>
+                    <div class="form-group">
+                        <label>关键词 *（至少一个，用逗号分隔）</label>
+                        <input type="text" id="uploadKeywords" required placeholder="风景,人像,摄影">
+                    </div>
+                    <div class="form-group">
+                        <label>描述</label>
+                        <textarea id="uploadDescription"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="uploadPrivate">
+                            设为私密内容
+                        </label>
+                    </div>
+                    <button type="submit" class="btn-primary">上传</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- 登录/注册模态框 -->
-    <div id="authModal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal">&times;</span>
-            <div class="auth-tabs">
-                <button class="tab-btn active" data-tab="login">登录</button>
-                <button class="tab-btn" data-tab="register">注册</button>
+    <div class="modal" id="authModal">
+        <div class="modal-content auth-modal">
+            <div class="modal-header">
+                <h2 id="authTitle">登录</h2>
+                <button class="modal-close"><i class="fas fa-times"></i></button>
             </div>
-            
-            <div id="loginTab" class="tab-content active">
-                <h2>登录</h2>
-                <form id="loginForm">
-                    <div class="form-group">
-                        <label for="loginEmail">邮箱</label>
-                        <input type="email" id="loginEmail" required>
+            <div class="modal-body">
+                <div class="auth-tabs">
+                    <button class="auth-tab active" data-type="login">登录</button>
+                    <button class="auth-tab" data-type="register">注册</button>
+                </div>
+                <form id="authForm">
+                    <div class="form-group" id="nameGroup" style="display: none;">
+                        <label>用户名</label>
+                        <input type="text" id="authName">
                     </div>
                     <div class="form-group">
-                        <label for="loginPassword">密码</label>
-                        <input type="password" id="loginPassword" required>
+                        <label>邮箱</label>
+                        <input type="email" id="authEmail" required>
                     </div>
-                    <button type="submit" class="btn btn-primary">登录</button>
+                    <div class="form-group">
+                        <label>密码</label>
+                        <input type="password" id="authPassword" required>
+                    </div>
+                    <div class="form-group" id="confirmPasswordGroup" style="display: none;">
+                        <label>确认密码</label>
+                        <input type="password" id="authConfirmPassword">
+                    </div>
+                    <button type="submit" class="btn-primary" id="authSubmit">登录</button>
                 </form>
-            </div>
-            
-            <div id="registerTab" class="tab-content">
-                <h2>注册</h2>
-                <form id="registerForm">
-                    <div class="form-group">
-                        <label for="registerName">用户名</label>
-                        <input type="text" id="registerName" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="registerEmail">邮箱</label>
-                        <input type="email" id="registerEmail" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="registerPassword">密码 (至少6位)</label>
-                        <input type="password" id="registerPassword" required minlength="6">
-                    </div>
-                    <button type="submit" class="btn btn-primary">注册</button>
-                </form>
+                <div class="auth-divider">或</div>
+                <button class="btn-google" id="googleAuthBtn">
+                    <i class="fab fa-google"></i> 使用 Google 账号
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- 上传照片模态框 -->
-    <div id="uploadModal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal">&times;</span>
-            <h2>上传照片</h2>
-            <form id="uploadForm">
-                <div class="form-group">
-                    <label for="photoUpload">选择照片</label>
-                    <input type="file" id="photoUpload" accept="image/*" required>
-                    <div class="image-preview" id="imagePreview">
-                        <img id="previewImage" src="" alt="预览">
-                    </div>
+    <!-- 图片/视频查看器 -->
+    <div class="modal" id="viewerModal">
+        <div class="modal-content viewer-modal">
+            <button class="modal-close"><i class="fas fa-times"></i></button>
+            <div class="viewer-container">
+                <div class="viewer-main">
+                    <div class="viewer-media" id="viewerMedia"></div>
+                    <button class="viewer-prev" id="viewerPrev"><i class="fas fa-chevron-left"></i></button>
+                    <button class="viewer-next" id="viewerNext"><i class="fas fa-chevron-right"></i></button>
                 </div>
-                <div class="form-group">
-                    <label for="photoTitle">标题</label>
-                    <input type="text" id="photoTitle" placeholder="给照片起个标题" required>
-                </div>
-                <div class="form-group">
-                    <label for="photoDescription">描述</label>
-                    <textarea id="photoDescription" placeholder="描述一下这张照片..." rows="3"></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="photoKeywords">关键词 (用逗号分隔)</label>
-                    <input type="text" id="photoKeywords" placeholder="例如：自然,风景,旅行" required>
-                    <small>最少一个关键词，多个用逗号分隔</small>
-                </div>
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" id="photoPrivate">
-                        设为私密（仅自己可见）
-                    </label>
-                </div>
-                <div class="form-group">
-                    <button type="submit" class="btn btn-primary" id="uploadSubmitBtn">
-                        <i class="fas fa-cloud-upload-alt"></i> 上传照片
-                    </button>
-                    <div class="upload-progress" id="uploadProgress">
-                        <div class="progress-bar"></div>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- 图片详情模态框 -->
-    <div id="imageDetailModal" class="modal">
-        <div class="modal-content image-detail">
-            <span class="close-modal">&times;</span>
-            <div class="image-detail-container">
-                <div class="image-side">
-                    <img id="detailImage" src="" alt="详情">
-                    <div class="image-actions">
-                        <button id="likeBtn"><i class="far fa-heart"></i> <span id="likeCount">0</span></button>
-                        <button id="downloadBtn"><i class="fas fa-download"></i></button>
-                        <button id="shareBtn"><i class="fas fa-share"></i></button>
-                    </div>
-                </div>
-                <div class="info-side">
-                    <div class="user-info">
-                        <img id="detailUserAvatar" src="" alt="用户头像" class="avatar">
-                        <div>
-                            <h3 id="detailUserName"></h3>
-                            <p id="detailUploadTime"></p>
+                <div class="viewer-sidebar">
+                    <div class="viewer-header">
+                        <div class="viewer-author" id="viewerAuthor"></div>
+                        <div class="viewer-actions">
+                            <button class="action-btn" id="viewerLike">
+                                <i class="far fa-heart"></i>
+                                <span id="viewerLikeCount">0</span>
+                            </button>
+                            <button class="action-btn" id="viewerFollow">
+                                <i class="far fa-user-plus"></i>
+                            </button>
+                            <button class="action-btn" id="viewerShare">
+                                <i class="fas fa-share-alt"></i>
+                            </button>
                         </div>
                     </div>
-                    <h2 id="detailTitle"></h2>
-                    <p id="detailDescription"></p>
-                    <div class="keywords" id="detailKeywords"></div>
-                    
-                    <div class="comments-section">
-                        <h3>评论</h3>
-                        <div class="comment-form">
-                            <textarea id="commentInput" placeholder="添加评论..."></textarea>
-                            <button id="submitComment" class="btn btn-small">发布</button>
+                    <div class="viewer-title" id="viewerTitle"></div>
+                    <div class="viewer-keywords" id="viewerKeywords"></div>
+                    <div class="viewer-description" id="viewerDescription"></div>
+                    <div class="viewer-stats" id="viewerStats"></div>
+                    <div class="viewer-comments">
+                        <div class="comment-input">
+                            <textarea id="commentText" placeholder="添加评论..."></textarea>
+                            <button id="postComment" class="btn-primary">评论</button>
                         </div>
                         <div class="comments-list" id="commentsList"></div>
                     </div>
+                    <div class="related-content">
+                        <h3>相关内容</h3>
+                        <div class="related-grid" id="relatedGrid"></div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 个人资料编辑模态框 -->
-    <div id="profileEditModal" class="modal">
+    <!-- 个人信息编辑模态框 -->
+    <div class="modal" id="editProfileModal">
         <div class="modal-content">
-            <span class="close-modal">&times;</span>
-            <h2>编辑个人资料</h2>
-            <form id="profileEditForm">
-                <div class="form-group">
-                    <label for="editAvatar">头像</label>
-                    <input type="file" id="editAvatar" accept="image/*">
-                    <div class="avatar-preview">
-                        <img id="avatarPreview" src="" alt="头像预览">
+            <div class="modal-header">
+                <h2>编辑个人资料</h2>
+                <button class="modal-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="editProfileForm">
+                    <div class="form-group">
+                        <label>头像</label>
+                        <div class="avatar-upload">
+                            <img id="avatarPreview" src="https://via.placeholder.com/150" alt="头像预览">
+                            <input type="file" id="avatarInput" accept="image/*">
+                            <button type="button" class="btn-upload">选择图片</button>
+                        </div>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label for="editUsername">用户名</label>
-                    <input type="text" id="editUsername" required>
-                </div>
-                <div class="form-group">
-                    <label for="editBio">个人简介</label>
-                    <textarea id="editBio" rows="4" placeholder="介绍一下你自己..."></textarea>
-                </div>
-                <button type="submit" class="btn btn-primary">保存更改</button>
-            </form>
+                    <div class="form-group">
+                        <label>用户名</label>
+                        <input type="text" id="editName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>邮箱</label>
+                        <input type="email" id="editEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label>个人简介</label>
+                        <textarea id="editBio"></textarea>
+                    </div>
+                    <button type="submit" class="btn-primary">保存</button>
+                </form>
+            </div>
         </div>
     </div>
 
-    <!-- 主要内容区 -->
-    <main class="main-content">
-        <div class="container">
-            <!-- 热门图片区 -->
-            <section class="featured-section">
-                <h2><i class="fas fa-fire"></i> 热门图片</h2>
-                <div class="featured-grid" id="featuredGrid"></div>
-            </section>
+    <!-- Toast 提示 -->
+    <div class="toast" id="toast"></div>
 
-            <!-- 最新图片区 -->
-            <section class="photos-section">
-                <h2><i class="fas fa-images"></i> 最新图片</h2>
-                <div class="filters">
-                    <button class="filter-btn active" data-filter="all">全部</button>
-                    <button class="filter-btn" data-filter="following">关注</button>
-                    <button class="filter-btn" data-filter="popular">热门</button>
-                </div>
-                <div class="photos-grid" id="photosGrid"></div>
-                <div class="loading" id="loading">
-                    <div class="spinner"></div>
-                    加载中...
-                </div>
-            </section>
-        </div>
-    </main>
-
-    <!-- 用户资料侧边栏 -->
-    <aside class="sidebar" id="sidebar">
-        <div class="sidebar-content">
-            <div class="user-profile-card" id="userProfileCard">
-                <div class="profile-header">
-                    <img id="sidebarAvatar" src="" alt="头像" class="avatar-large">
-                    <h2 id="sidebarUsername">未登录</h2>
-                    <p id="sidebarBio">请登录查看个人资料</p>
-                </div>
-                <div class="profile-stats">
-                    <div class="stat">
-                        <strong id="sidebarPhotos">0</strong>
-                        <span>照片</span>
-                    </div>
-                    <div class="stat">
-                        <strong id="sidebarFollowers">0</strong>
-                        <span>粉丝</span>
-                    </div>
-                    <div class="stat">
-                        <strong id="sidebarFollowing">0</strong>
-                        <span>关注</span>
-                    </div>
-                </div>
-                <div class="profile-actions" id="profileActions">
-                    <button id="editProfileBtn" class="btn btn-secondary hide">编辑资料</button>
-                    <button id="followBtn" class="btn btn-primary hide">关注</button>
-                </div>
-            </div>
-            
-            <div class="trending-keywords">
-                <h3>热门关键词</h3>
-                <div class="keywords-list" id="keywordsList"></div>
-            </div>
-            
-            <div class="admin-panel hide" id="adminPanel">
-                <h3>管理员面板</h3>
-                <button id="managePhotosBtn" class="btn btn-secondary">管理照片</button>
-                <button id="viewStatsBtn" class="btn btn-secondary">查看统计</button>
-            </div>
-        </div>
-    </aside>
-
-    <script src="script.js"></script>
-    <!-- Cloudinary Upload Widget -->
-    <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
+    <script type="module" src="app.js"></script>
 </body>
 </html>

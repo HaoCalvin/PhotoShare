@@ -1,0 +1,17 @@
+{
+  "name": "photoshare",
+  "version": "1.0.0",
+  "description": "Photo & Video Sharing Platform",
+  "main": "index.html",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "firebase": "^10.7.1"
+  },
+  "devDependencies": {
+    "vite": "^5.0.8"
+  }
+}
